@@ -36,9 +36,9 @@ function DeferredObject() {
                     }
                 };
             }
-            if (state === STATES.RESOLVE) {
+            if (state === STATES.RESOLVE && isFunction(onFulfilled)) {
                 makeCallback(onFulfilled)(value);
-            } else if (state === STATES.REJECT) {
+            } else if (state === STATES.REJECT && isFunction(onRejected)) {
                 makeCallback(onRejected)(value);
             } else {
                 if (isFunction(onFulfilled)) {
@@ -65,6 +65,7 @@ function DeferredObject() {
             }
         } else {
             value = x;
+            state = STATES.RESOLVE;
             for (var i = 0; i < fulfillHandlers; ++i) {
                 defer(fulfillHandlers[i], value);
             }
@@ -78,6 +79,7 @@ function DeferredObject() {
             return; // ignore multiple calls
         } else {
             value = x;
+            state = STATES.REJECT;
             for (var i = 0; i < fulfillHandlers; ++i) {
                 defer(fulfillHandlers[i], value);
             }
