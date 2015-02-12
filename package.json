@@ -1,0 +1,18 @@
+{
+  "name": "fbpromise",
+  "version": "0.0.0",
+  "description": "Promises/A+ library for FireBreath",
+  "main": "FireBreathPromise.js",
+  "devDependencies": {
+    "promises-aplus-tests": "^2.1.0"
+  },
+  "scripts": {
+    "test": "promises-aplus-tests test/adapter"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/firebreath/fbpromise.git"
+  },
+  "author": "Richard Bateman <taxilian@gmail.com>",
+  "homepage": "https://github.com/firebreath/fbpromise"
+}
