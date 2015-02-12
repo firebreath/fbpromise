@@ -5,14 +5,10 @@ function isObject(obj) {
     var type = typeof obj;
     return type === 'function' || type === 'object' && !!obj;
 }
-var isFunction = function (obj) {
-    return toString.call(obj) === '[object Function]';
-};
+var isFunction = function (obj) { return toString.call(obj) === '[object Function]'; };
 // Optimize `isFunction` if appropriate. Work around an IE 11 bug. Pulled from underscore.js
 if (typeof /./ !== 'function') {
-    isFunction = function(obj) {
-        return typeof obj == 'function' || false;
-    };
+    isFunction = function(obj) { return typeof obj == 'function' || false; };
 }
 function defer(fn, arg) { setTimeout(function() { fn(arg); }, 0); }
 function isThennable(x) { return (isObject(x) && isFunction(x.then)); }
