@@ -1,4 +1,5 @@
-(function(global) {
+(function() {
+var global=this;
 var toString = Object.prototype.toString;
 // Shamelessly borrowed from underscore.js
 function isObject(obj) {
@@ -87,4 +88,4 @@ function makeDeferred() {
     return new DeferredObject();
 }
 this.FireBreathPromise = makeDeferred;
-}).call(this);
+}).call((module && module.exports) ? module.exports : this);
