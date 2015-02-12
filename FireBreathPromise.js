@@ -19,75 +19,76 @@ function isThennable(x) { return (isObject(x) && isFunction(x.then)); }
 
 var STATES = { PEND: 1, RESOLVE: 2, REJECT: 3 };
 
-function FireBreathPromise() {
-    var dfdObj = function() {
-        var self=this;
-        var fulfillHandlers = [];
-        var rejectHandlers = [];
-        var state = STATES.PEND;
-        var value;
+function DeferredObject() {
+    var self=this;
+    var fulfillHandlers = [];
+    var rejectHandlers = [];
+    var state = STATES.PEND;
+    var value;
 
-        this.promise = {
-            then: function(onFulfilled, onRejected) {
-                var promise2 = FireBreathPromise();
-                function makeCallback(cbFunc) {
-                    return function handleCallback(value) {
-                        try {
-                            var x = cbFunc(value);
-                            promise2.resolve(x);
-                        } catch (e) {
-                            promise2.reject(e);
-                        }
-                    };
-                }
-                if (state === STATES.RESOLVE) {
-                    makeCallback(onFulfilled)(value);
-                } else if (state === STATES.REJECT) {
-                    makeCallback(onRejected)(value);
-                } else {
-                    if (isFunction(onFulfilled)) {
-                        fulfillHandlers.push(makeCallback(onFulfilled));
+    this.promise = {
+        then: function(onFulfilled, onRejected) {
+            var promise2 = new DeferredObject();
+            function makeCallback(cbFunc) {
+                return function handleCallback(value) {
+                    try {
+                        var x = cbFunc(value);
+                        promise2.resolve(x);
+                    } catch (e) {
+                        promise2.reject(e);
                     }
-                    if (isFunction(onRejected)) {
-                        rejectHandlers.push(makeCallback(onRejected));
-                    }
-                }
+                };
             }
-        };
-
-        this.resolve = function(x) {
-            if (x === self) {
-                self.reject(new Error("TypeError"));
-            } else if (state !== STATES.PEND) {
-                return; // ignore multiple calls
-            } else if (isThennable(x)) {
-                try {
-                    x.then(self.resolve, self.reject);
-                } catch (e) {
-                    self.reject(e);
-                }
+            if (state === STATES.RESOLVE) {
+                makeCallback(onFulfilled)(value);
+            } else if (state === STATES.REJECT) {
+                makeCallback(onRejected)(value);
             } else {
-                value = x;
-                for (var i = 0; i < fulfillHandlers; ++i) {
-                    defer(fulfillHandlers[i], value);
+                if (isFunction(onFulfilled)) {
+                    fulfillHandlers.push(makeCallback(onFulfilled));
+                }
+                if (isFunction(onRejected)) {
+                    rejectHandlers.push(makeCallback(onRejected));
                 }
             }
-        };
-
-        this.reject = function(x) {
-            if (x === self) {
-                self.reject(new Error("TypeError"));
-            } else if (state !== STATES.PEND) {
-                return; // ignore multiple calls
-            } else {
-                value = x;
-                for (var i = 0; i < fulfillHandlers; ++i) {
-                    defer(fulfillHandlers[i], value);
-                }
-            }
-        };
+            return promise2.promise;
+        }
     };
-    return new dfdObj();
+
+    this.resolve = function(x) {
+        if (x === self) {
+            self.reject(new Error("TypeError"));
+        } else if (state !== STATES.PEND) {
+            return; // ignore multiple calls
+        } else if (isThennable(x)) {
+            try {
+                x.then(self.resolve, self.reject);
+            } catch (e) {
+                self.reject(e);
+            }
+        } else {
+            value = x;
+            for (var i = 0; i < fulfillHandlers; ++i) {
+                defer(fulfillHandlers[i], value);
+            }
+        }
+    };
+
+    this.reject = function(x) {
+        if (x === self) {
+            self.reject(new Error("TypeError"));
+        } else if (state !== STATES.PEND) {
+            return; // ignore multiple calls
+        } else {
+            value = x;
+            for (var i = 0; i < fulfillHandlers; ++i) {
+                defer(fulfillHandlers[i], value);
+            }
+        }
+    };
 }
-this.FireBreathPromise = FireBreathPromise;
+function makeDeferred() {
+    return new DeferredObject();
+}
+this.FireBreathPromise = makeDeferred;
 }).call(this);
