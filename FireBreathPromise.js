@@ -1,4 +1,5 @@
 (function() {
+if (this.FireBreathPromise) { return; }
 var global=this;
 function isObject(obj) { var type = typeof obj; return type === 'function' || type === 'object' && !!obj; }
 var toString = Object.prototype.toString;
@@ -120,4 +121,4 @@ function makeDeferred(name) {
     return new DeferredObject(name);
 }
 this.FireBreathPromise = makeDeferred;
-}).call((module && module.exports) ? module.exports : this);
+}).call((typeof module == 'object' && module.exports) ? module.exports : this);
